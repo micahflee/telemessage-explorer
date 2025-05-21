@@ -1,0 +1,38 @@
+services:
+  app:
+    build: app/.
+    environment:
+      - DB_NAME=db
+      - DB_USER=db
+      - DB_PASSWORD=db
+      - DB_HOST=db
+      - DB_PORT=5432
+      # start flask in dev mode
+      - FLASK_ENV=development
+      - FLASK_DEBUG=1
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app:/app
+    depends_on:
+      - db
+  
+  # start the vue frontend in dev mode
+  frontend:
+    build: ./app/frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./app/frontend:/app
+  
+  db:
+    image: postgres:17
+    volumes:
+      - ./volumes/db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=db
+      - POSTGRES_PASSWORD=db
+      - POSTGRES_DB=db
+    ports:
+      # expose the database on port 54320
+      - "127.0.0.1:54320:5432"
