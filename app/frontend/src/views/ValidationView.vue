@@ -4,6 +4,8 @@ import { useRoute } from 'vue-router';
 import { type ValidationDetails } from '@/types.ts';
 import { API } from '@/api.ts';
 
+import UserListComponent from '@/components/UserListComponent.vue';
+
 const route = useRoute();
 const validationId = Number(route.params.validationId);
 
@@ -48,6 +50,14 @@ onMounted(async () => {
                         Provider: <strong>{{ validationDetails.validation.active_identity_provider }}</strong>
                     </li>
                 </ul>
+
+                <template v-if="validationDetails.users.length > 0">
+                    <h3>Users</h3>
+                    <UserListComponent :users="validationDetails.users" :total="validationDetails.users.length" />
+                </template>
+                <template v-else>
+                    <h3 class="text-muted">No users found</h3>
+                </template>
             </template>
         </template>
     </div>

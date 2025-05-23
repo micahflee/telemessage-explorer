@@ -74,4 +74,5 @@ export type ValidationDetails = {
     validation: Validation;
     obj?: object;
     obj_type?: string;
+    users: User[];
 };

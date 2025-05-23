@@ -696,8 +696,9 @@ def get_validations():
 
 @app.route("/api/validations/<int:validation_id>", methods=["GET"])
 def get_validation(validation_id):
-    """Get details of a specific validation by ID."""
+    """Get details of a specific validation by ID, including associated users."""
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+        # Get the validation row
         cursor.execute(
             f"""
             SELECT {", ".join(select_fields_validations)}
@@ -710,4 +711,21 @@ def get_validation(validation_id):
         if not validation:
             return jsonify({"error": "Validation not found"}), 404
 
-    return jsonify({"validation": validation})
+        # Get associated users where validation.username = users.value, including group_count and message_count
+        cursor.execute(
+            f"""
+            SELECT 
+                {", ".join([f"u.{f}" for f in select_fields_users])},
+                COUNT(DISTINCT ug.group_id) AS group_count,
+                COUNT(DISTINCT um.message_id) AS message_count
+            FROM telemessage_users u
+            LEFT JOIN telemessage_users_groups ug ON u.id = ug.user_id
+            LEFT JOIN telemessage_users_messages um ON u.id = um.user_id
+            WHERE u.value = %s
+            GROUP BY u.id, u.type, u.value, u.first_name, u.last_name, u.notes
+            """,
+            (validation["username"],),
+        )
+        users = cursor.fetchall()
+
+    return jsonify({"validation": validation, "users": users})
