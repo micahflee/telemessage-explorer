@@ -24,6 +24,9 @@ provide('api', api);
         <li class="nav-item">
           <router-link to="/messages" class="nav-link">Messages</router-link>
         </li>
+        <li class="nav-item">
+          <router-link to="/validations" class="nav-link">Validations</router-link>
+        </li>
       </ul>
     </div>
   </nav>

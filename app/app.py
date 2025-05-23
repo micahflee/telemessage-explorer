@@ -71,6 +71,8 @@ select_fields_users = [
     "notes",
 ]
 
+select_fields_validations = ["id", "username", "email", "email_domain", "active_identity_provider"]
+
 default_pagination_limit = 500
 
 
@@ -102,9 +104,7 @@ def get_messages():
             return jsonify({"error": "Invalid order parameter"}), 400
 
         hide_encrypted = request.args.get("hide_encrypted", "false").lower() == "true"
-        show_attachments = (
-            request.args.get("show_attachments", "false").lower() == "true"
-        )
+        show_attachments = request.args.get("show_attachments", "false").lower() == "true"
     except ValueError:
         return jsonify({"error": "Invalid pagination parameters"}), 400
 
@@ -555,3 +555,107 @@ def get_group_details(group_id):
             "messages": messages,
         }
     )
+
+
+@app.route("/api/validations", methods=["GET"])
+def get_validations():
+    """Get all validations, with optional search, sort, and order."""
+    try:
+        limit = int(request.args.get("limit", default_pagination_limit))
+        offset = int(request.args.get("offset", 0))
+        q = request.args.get("q", "")
+        sort = request.args.get("sort", "id")
+        if sort not in [
+            "id",
+            "username",
+            "email",
+            "email_domain",
+            "active_identity_provider",
+        ]:
+            return jsonify({"error": "Invalid sort parameter"}), 400
+        order = request.args.get("order", "desc")
+        if order not in ["asc", "desc"]:
+            return jsonify({"error": "Invalid order parameter"}), 400
+    except ValueError:
+        return jsonify({"error": "Invalid pagination parameters"}), 400
+
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+        if q == "":
+            # Get total count for pagination metadata
+            cursor.execute("SELECT COUNT(*) FROM telemessage_validations")
+            total = cursor.fetchone()["count"]
+
+            # Get paginated validations
+            cursor.execute(
+                f"""
+                SELECT
+                    {", ".join(select_fields_validations)}
+                FROM telemessage_validations
+                ORDER BY {sort} {order}
+                LIMIT %s OFFSET %s
+                """,
+                (limit, offset),
+            )
+            validations = cursor.fetchall()
+        else:
+            # Get total count for pagination metadata
+            cursor.execute(
+                """
+                SELECT COUNT(*) FROM telemessage_users
+                WHERE
+                    username ILIKE %s OR
+                    email ILIKE %s OR
+                    email_domain ILIKE %s OR
+                    active_identity_provider ILIKE %s
+                """,
+                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
+            )
+            total = cursor.fetchone()["count"]
+
+            # Get paginated validations
+            cursor.execute(
+                f"""
+                SELECT
+                    {", ".join(select_fields_validations)}
+                FROM telemessage_validations
+                WHERE
+                    username ILIKE %s OR
+                    email ILIKE %s OR
+                    email_domain ILIKE %s OR
+                    active_identity_provider ILIKE %s
+                ORDER BY {sort} {order}
+                LIMIT %s OFFSET %s
+                """,
+                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
+            )
+            validations = cursor.fetchall()
+
+    return jsonify(
+        {
+            "validations": validations,
+            "pagination": {
+                "total": total,
+                "limit": limit,
+                "offset": offset,
+            },
+        }
+    )
+
+
+@app.route("/api/validations/<int:validation_id>", methods=["GET"])
+def get_validation(validation_id):
+    """Get details of a specific validation by ID."""
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+        cursor.execute(
+            f"""
+            SELECT {", ".join(select_fields_validations)}
+            FROM telemessage_validations
+            WHERE id = %s
+            """,
+            (validation_id,),
+        )
+        validation = cursor.fetchone()
+        if not validation:
+            return jsonify({"error": "Validation not found"}), 404
+
+    return jsonify({"validation": validation})

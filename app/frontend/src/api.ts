@@ -1,4 +1,13 @@
-import type { Group, GroupDetails, User, UserDetails, Message, MessageDetails } from './types.ts'
+import type {
+    Group,
+    GroupDetails,
+    User,
+    UserDetails,
+    Message,
+    MessageDetails,
+    Validation,
+    ValidationDetails
+} from './types.ts'
 
 export class API {
     private baseUrl: string;
@@ -66,6 +75,7 @@ export class API {
         const data = await response.json();
         return data;
     }
+
     async getUser(userId: number): Promise<UserDetails> {
         const response = await this.apiFetch(`/users/${userId}`);
         const userDetails: UserDetails = await response.json();
@@ -99,5 +109,30 @@ export class API {
         const response = await this.apiFetch(`/messages/${messageId}`);
         const messageDetails: MessageDetails = await response.json();
         return messageDetails;
+    }
+
+    async getValidations(
+        limit = 500,
+        offset = 0,
+        q = "",
+        sort = "id",
+        order = "desc"
+    ): Promise<{ validations: Validation[], pagination: { total: number, limit: number, offset: number } }> {
+        const params = new URLSearchParams({
+            limit: String(limit),
+            offset: String(offset),
+            q,
+            sort,
+            order,
+        });
+        const response = await this.apiFetch(`/validations?${params.toString()}`);
+        const data = await response.json();
+        return data;
+    }
+
+    async getValidation(validationId: number): Promise<ValidationDetails> {
+        const response = await this.apiFetch(`/validations/${validationId}`);
+        const validation: ValidationDetails = await response.json();
+        return validation;
     }
 }

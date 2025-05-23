@@ -5,6 +5,8 @@ import UsersView from "./views/UsersView.vue";
 import UserView from "./views/UserView.vue";
 import MessagesView from "./views/MessagesView.vue";
 import MessageView from "./views/MessageView.vue";
+import ValidationsView from "./views/ValidationsView.vue";
+import ValidationView from "./views/ValidationView.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -36,6 +38,16 @@ const routes: Array<RouteRecordRaw> = [
         path: "/messages/:messageId",
         name: "message",
         component: MessageView,
+    },
+    {
+        path: "/validations",
+        name: "validations",
+        component: ValidationsView,
+    },
+    {
+        path: "/validations/:validationId",
+        name: "validation",
+        component: ValidationView,
     },
 ];
 

@@ -43,6 +43,14 @@ export type Attachment = {
     content_type: string;
 }
 
+export type Validation = {
+    id: number;
+    username: string;
+    email: string;
+    email_domain: string;
+    active_identity_provider: string;
+};
+
 export type GroupDetails = {
     group: Group;
     users: User[];
@@ -60,4 +68,10 @@ export type MessageDetails = {
     groups: Group[];
     users: User[];
     attachments: Attachment[];
+};
+
+export type ValidationDetails = {
+    validation: Validation;
+    obj?: object;
+    obj_type?: string;
 };
