@@ -559,7 +559,7 @@ def get_group_details(group_id):
 
 @app.route("/api/validations", methods=["GET"])
 def get_validations():
-    """Get all validations, with optional search, sort, order, and distinct emails."""
+    """Get all validations, with optional search, sort, order, and distinct emails. Also includes user_count, message_count, group_count."""
     try:
         limit = int(request.args.get("limit", default_pagination_limit))
         offset = int(request.args.get("offset", 0))
@@ -571,6 +571,9 @@ def get_validations():
             "email",
             "email_domain",
             "active_identity_provider",
+            "user_count",
+            "message_count",
+            "group_count",
         ]:
             return jsonify({"error": "Invalid sort parameter"}), 400
         order = request.args.get("order", "desc")
@@ -582,12 +585,31 @@ def get_validations():
         return jsonify({"error": "Invalid pagination parameters"}), 400
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-        base_select = f"{', '.join(select_fields_validations)}"
+        # Compose the select fields with aggregates
+        agg_select = """
+            (
+                SELECT COUNT(*) FROM telemessage_users u WHERE u.value = v.username
+            ) AS user_count,
+            (
+                SELECT COUNT(DISTINCT um.message_id)
+                FROM telemessage_users u
+                LEFT JOIN telemessage_users_messages um ON u.id = um.user_id
+                WHERE u.value = v.username
+            ) AS message_count,
+            (
+                SELECT COUNT(DISTINCT ug.group_id)
+                FROM telemessage_users u
+                LEFT JOIN telemessage_users_groups ug ON u.id = ug.user_id
+                WHERE u.value = v.username
+            ) AS group_count
+        """
+        base_select = f"{', '.join([f'v.{f}' for f in select_fields_validations])}, {agg_select}"
+
         if distinct_emails:
             # Use a subquery to allow arbitrary ordering after deduplication
             subquery = f"""
                 SELECT DISTINCT ON (email) {base_select}
-                FROM telemessage_validations
+                FROM telemessage_validations v
                 {
                 "WHERE "
                 + " OR ".join(
@@ -659,7 +681,7 @@ def get_validations():
                 cursor.execute(
                     f"""
                     SELECT {base_select}
-                    FROM telemessage_validations
+                    FROM telemessage_validations v
                     WHERE
                         username ILIKE %s OR
                         email ILIKE %s OR
@@ -674,7 +696,7 @@ def get_validations():
                 cursor.execute(
                     f"""
                     SELECT {base_select}
-                    FROM telemessage_validations
+                    FROM telemessage_validations v
                     ORDER BY {sort} {order}
                     LIMIT %s OFFSET %s
                     """,

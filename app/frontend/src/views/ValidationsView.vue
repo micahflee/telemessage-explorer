@@ -24,6 +24,9 @@ const sortOptions = [
     { value: 'email', label: 'Email' },
     { value: 'email_domain', label: 'Domain' },
     { value: 'active_identity_provider', label: 'Provider' },
+    { value: 'user_count', label: 'Users' },
+    { value: 'message_count', label: 'Messages' },
+    { value: 'group_count', label: 'Groups' },
 ];
 
 async function loadValidations() {

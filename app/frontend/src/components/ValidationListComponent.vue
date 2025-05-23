@@ -22,6 +22,9 @@ defineProps<{
                         <th class="text-nowrap">Email</th>
                         <th class="text-nowrap">Domain</th>
                         <th class="text-nowrap">Provider</th>
+                        <th class="text-nowrap">Users</th>
+                        <th class="text-nowrap">Messages</th>
+                        <th class="text-nowrap">Groups</th>
                     </tr>
                 </thead>
                 <tbody class="list">
@@ -30,12 +33,16 @@ defineProps<{
                     </tr>
                     <tr v-for="validation in validations" :key="validation.id">
                         <td class="id">
-                            <router-link :to="`/validations/${validation.id}`" class="btn btn-secondary btn-sm">{{ validation.id }}</router-link>
+                            <router-link :to="`/validations/${validation.id}`" class="btn btn-secondary btn-sm">{{
+                                validation.id }}</router-link>
                         </td>
                         <td class="username">{{ validation.username }}</td>
                         <td class="email">{{ validation.email }}</td>
                         <td class="email_domain">{{ validation.email_domain }}</td>
                         <td class="active_identity_provider">{{ validation.active_identity_provider }}</td>
+                        <td class="user_count">{{ validation.user_count.toLocaleString() }}</td>
+                        <td class="message_count">{{ validation.message_count.toLocaleString() }}</td>
+                        <td class="group_count">{{ validation.group_count.toLocaleString() }}</td>
                     </tr>
                 </tbody>
             </table>

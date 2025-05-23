@@ -49,6 +49,9 @@ export type Validation = {
     email: string;
     email_domain: string;
     active_identity_provider: string;
+    user_count: number;
+    message_count: number;
+    group_count: number;
 };
 
 export type GroupDetails = {
