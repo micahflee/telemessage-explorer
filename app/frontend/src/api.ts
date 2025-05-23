@@ -116,7 +116,8 @@ export class API {
         offset = 0,
         q = "",
         sort = "id",
-        order = "desc"
+        order = "desc",
+        distinctEmails = false
     ): Promise<{ validations: Validation[], pagination: { total: number, limit: number, offset: number } }> {
         const params = new URLSearchParams({
             limit: String(limit),
@@ -124,6 +125,7 @@ export class API {
             q,
             sort,
             order,
+            distinct_emails: distinctEmails ? "true" : "false",
         });
         const response = await this.apiFetch(`/validations?${params.toString()}`);
         const data = await response.json();

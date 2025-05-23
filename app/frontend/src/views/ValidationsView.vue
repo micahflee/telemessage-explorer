@@ -16,23 +16,25 @@ const total = ref(0);
 const q = ref('');
 const sort = ref('id');
 const order = ref('desc');
+const distinctEmails = ref(false);
 
 const sortOptions = [
-  { value: 'id', label: 'ID' },
-  { value: 'username', label: 'Username' },
-  { value: 'email', label: 'Email' },
-  { value: 'email_domain', label: 'Domain' },
-  { value: 'active_identity_provider', label: 'Provider' },
+    { value: 'id', label: 'ID' },
+    { value: 'username', label: 'Username' },
+    { value: 'email', label: 'Email' },
+    { value: 'email_domain', label: 'Domain' },
+    { value: 'active_identity_provider', label: 'Provider' },
 ];
 
 async function loadValidations() {
     isLoading.value = true;
     const data = await api.getValidations(
-      limit.value,
-      offset.value,
-      q.value,
-      sort.value,
-      order.value
+        limit.value,
+        offset.value,
+        q.value,
+        sort.value,
+        order.value,
+        distinctEmails.value
     );
     validations.value = data.validations;
     total.value = data.pagination.total;
@@ -73,6 +75,11 @@ function updateOrder(newOrder: string) {
         loadValidations();
     }
 }
+function updateDistinctEmails(val: boolean) {
+    distinctEmails.value = val;
+    offset.value = 0;
+    loadValidations();
+}
 
 onMounted(loadValidations);
 </script>
@@ -85,39 +92,22 @@ onMounted(loadValidations);
             <h2 class="text-muted text-center">Loading...</h2>
         </template>
         <template v-else>
-            <PaginationControls
-                class="mb-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <div class="mb-2 d-flex gap-3 align-items-center justify-content-center">
+                <label class="form-check-label">
+                    <input type="checkbox" class="form-check-input" v-model="distinctEmails"
+                        @change="updateDistinctEmails(distinctEmails)" />
+                    Show only distinct emails
+                </label>
+            </div>
+            <PaginationControls class="mb-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
 
             <ValidationListComponent :validations="validations" :total="total" />
 
-            <PaginationControls
-                class="mt-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <PaginationControls class="mt-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
         </template>
     </div>
 </template>

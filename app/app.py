@@ -559,7 +559,7 @@ def get_group_details(group_id):
 
 @app.route("/api/validations", methods=["GET"])
 def get_validations():
-    """Get all validations, with optional search, sort, and order."""
+    """Get all validations, with optional search, sort, order, and distinct emails."""
     try:
         limit = int(request.args.get("limit", default_pagination_limit))
         offset = int(request.args.get("offset", 0))
@@ -576,58 +576,110 @@ def get_validations():
         order = request.args.get("order", "desc")
         if order not in ["asc", "desc"]:
             return jsonify({"error": "Invalid order parameter"}), 400
+
+        distinct_emails = request.args.get("distinct_emails", "false").lower() == "true"
     except ValueError:
         return jsonify({"error": "Invalid pagination parameters"}), 400
 
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
-        if q == "":
+        base_select = f"{', '.join(select_fields_validations)}"
+        if distinct_emails:
+            # Use a subquery to allow arbitrary ordering after deduplication
+            subquery = f"""
+                SELECT DISTINCT ON (email) {base_select}
+                FROM telemessage_validations
+                {
+                "WHERE "
+                + " OR ".join(
+                    [
+                        "username ILIKE %s",
+                        "email ILIKE %s",
+                        "email_domain ILIKE %s",
+                        "active_identity_provider ILIKE %s",
+                    ]
+                )
+                if q
+                else ""
+            }
+                ORDER BY email, {sort} {order}
+            """
+            params = [f"%{q}%"] * 4 if q else []
             # Get total count for pagination metadata
-            cursor.execute("SELECT COUNT(*) FROM telemessage_validations")
+            if q:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) FROM (
+                        SELECT DISTINCT email
+                        FROM telemessage_validations
+                        WHERE
+                            username ILIKE %s OR
+                            email ILIKE %s OR
+                            email_domain ILIKE %s OR
+                            active_identity_provider ILIKE %s
+                    ) sub
+                    """,
+                    params,
+                )
+            else:
+                cursor.execute("SELECT COUNT(*) FROM (SELECT DISTINCT email FROM telemessage_validations) sub")
             total = cursor.fetchone()["count"]
 
-            # Get paginated validations
+            # Now apply arbitrary ordering and pagination on the deduplicated set
             cursor.execute(
                 f"""
-                SELECT
-                    {", ".join(select_fields_validations)}
-                FROM telemessage_validations
+                SELECT * FROM (
+                    {subquery}
+                ) AS deduped
                 ORDER BY {sort} {order}
                 LIMIT %s OFFSET %s
                 """,
-                (limit, offset),
+                params + [limit, offset],
             )
             validations = cursor.fetchall()
         else:
             # Get total count for pagination metadata
-            cursor.execute(
-                """
-                SELECT COUNT(*) FROM telemessage_users
-                WHERE
-                    username ILIKE %s OR
-                    email ILIKE %s OR
-                    email_domain ILIKE %s OR
-                    active_identity_provider ILIKE %s
-                """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
-            )
+            if q:
+                cursor.execute(
+                    """
+                    SELECT COUNT(*) FROM telemessage_validations
+                    WHERE
+                        username ILIKE %s OR
+                        email ILIKE %s OR
+                        email_domain ILIKE %s OR
+                        active_identity_provider ILIKE %s
+                    """,
+                    (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
+                )
+            else:
+                cursor.execute("SELECT COUNT(*) FROM telemessage_validations")
             total = cursor.fetchone()["count"]
 
             # Get paginated validations
-            cursor.execute(
-                f"""
-                SELECT
-                    {", ".join(select_fields_validations)}
-                FROM telemessage_validations
-                WHERE
-                    username ILIKE %s OR
-                    email ILIKE %s OR
-                    email_domain ILIKE %s OR
-                    active_identity_provider ILIKE %s
-                ORDER BY {sort} {order}
-                LIMIT %s OFFSET %s
-                """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
-            )
+            if q:
+                cursor.execute(
+                    f"""
+                    SELECT {base_select}
+                    FROM telemessage_validations
+                    WHERE
+                        username ILIKE %s OR
+                        email ILIKE %s OR
+                        email_domain ILIKE %s OR
+                        active_identity_provider ILIKE %s
+                    ORDER BY {sort} {order}
+                    LIMIT %s OFFSET %s
+                    """,
+                    (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
+                )
+            else:
+                cursor.execute(
+                    f"""
+                    SELECT {base_select}
+                    FROM telemessage_validations
+                    ORDER BY {sort} {order}
+                    LIMIT %s OFFSET %s
+                    """,
+                    (limit, offset),
+                )
             validations = cursor.fetchall()
 
     return jsonify(
