@@ -170,6 +170,10 @@ def create_tables(conn):
                     UNIQUE (user_id, group_id)
                 )
             """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_users_groups_user_id
+                ON telemessage_users_groups (user_id, group_id);
+            """)
 
             # join table for users and messages
             cursor.execute("""
@@ -179,6 +183,10 @@ def create_tables(conn):
                     message_id INT REFERENCES telemessage_messages(id) ON DELETE CASCADE,
                     UNIQUE (user_id, message_id)
                 )
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_users_messages_user_id
+                ON telemessage_users_messages (user_id, message_id);
             """)
 
             # join table for groups and messages
@@ -218,6 +226,27 @@ def create_tables(conn):
                     active_identity_provider TEXT
                 )
             """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_validations_username
+                ON telemessage_validations (username);
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_validations_email
+                ON telemessage_validations (email);
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_validations_email_domain
+                ON telemessage_validations (email_domain);
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_validations_active_idp
+                ON telemessage_validations (active_identity_provider);
+            """)
+            cursor.execute("""
+                CREATE INDEX IF NOT EXISTS idx_validations_email_sort
+                ON telemessage_validations (email);
+            """)
+
             conn.commit()
             print("Tables created successfully")
     except Exception as e:
