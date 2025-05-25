@@ -24,7 +24,6 @@ defineProps<{
                         <th class="text-nowrap">Last Name</th>
                         <th class="text-nowrap">Groups</th>
                         <th class="text-nowrap">Messages</th>
-                        <th class="text-nowrap">Notes</th>
                     </tr>
                 </thead>
                 <tbody class="list">
@@ -33,7 +32,8 @@ defineProps<{
                     </tr>
                     <tr v-for="user in users" :key="user.id">
                         <td class="id">
-                            <router-link :to="`/users/${user.id}`" class="btn btn-secondary btn-sm">{{ user.id }}</router-link>
+                            <router-link :to="`/users/${user.id}`" class="btn btn-secondary btn-sm">{{ user.id
+                                }}</router-link>
                         </td>
                         <td class="type">{{ user.type }}</td>
                         <td class="value">{{ user.value }}</td>
@@ -41,7 +41,6 @@ defineProps<{
                         <td class="last_name">{{ user.last_name }}</td>
                         <td class="group_count">{{ user.group_count.toLocaleString() }}</td>
                         <td class="message_count">{{ user.message_count.toLocaleString() }}</td>
-                        <td class="notes">{{ user.notes }}</td>
                     </tr>
                 </tbody>
             </table>

@@ -23,18 +23,17 @@ const sortOptions = [
     { value: 'source_type', label: 'Source Type' },
     { value: 'network_type', label: 'Network Type' },
     { value: 'message_count', label: 'Messages' },
-    { value: 'user_count', label: 'Users' },
-    { value: 'notes', label: 'Notes' },
+    { value: 'user_count', label: 'Users' }
 ];
 
 async function loadGroups() {
     isLoading.value = true;
     const data = await api.getGroups(
-      limit.value,
-      offset.value,
-      q.value,
-      sort.value,
-      order.value
+        limit.value,
+        offset.value,
+        q.value,
+        sort.value,
+        order.value
     );
     groups.value = data.groups;
     total.value = data.pagination.total;
@@ -87,39 +86,15 @@ onMounted(loadGroups);
             <h2 class="text-muted text-center">Loading...</h2>
         </template>
         <template v-else>
-            <PaginationControls
-                class="mb-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <PaginationControls class="mb-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
 
             <GroupListComponent :groups="groups" :total="total" />
 
-            <PaginationControls
-                class="mt-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <PaginationControls class="mt-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
         </template>
     </div>
 </template>

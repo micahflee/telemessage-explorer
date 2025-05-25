@@ -18,24 +18,23 @@ const sort = ref('id');
 const order = ref('desc');
 
 const sortOptions = [
-  { value: 'id', label: 'ID' },
-  { value: 'type', label: 'Type' },
-  { value: 'value', label: 'Value' },
-  { value: 'first_name', label: 'First Name' },
-  { value: 'last_name', label: 'Last Name' },
-  { value: 'group_count', label: 'Groups' },
-  { value: 'message_count', label: 'Messages' },
-  { value: 'notes', label: 'Notes' },
+    { value: 'id', label: 'ID' },
+    { value: 'type', label: 'Type' },
+    { value: 'value', label: 'Value' },
+    { value: 'first_name', label: 'First Name' },
+    { value: 'last_name', label: 'Last Name' },
+    { value: 'group_count', label: 'Groups' },
+    { value: 'message_count', label: 'Messages' },
 ];
 
 async function loadUsers() {
     isLoading.value = true;
     const data = await api.getUsers(
-      limit.value,
-      offset.value,
-      q.value,
-      sort.value,
-      order.value
+        limit.value,
+        offset.value,
+        q.value,
+        sort.value,
+        order.value
     );
     users.value = data.users;
     total.value = data.pagination.total;
@@ -88,39 +87,15 @@ onMounted(loadUsers);
             <h2 class="text-muted text-center">Loading...</h2>
         </template>
         <template v-else>
-            <PaginationControls
-                class="mb-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <PaginationControls class="mb-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
 
             <UserListComponent :users="users" :total="total" />
 
-            <PaginationControls
-                class="mt-3"
-                :total="total"
-                :limit="limit"
-                :offset="offset"
-                :q="q"
-                :sort="sort"
-                :order="order"
-                :sortOptions="sortOptions"
-                @update:limit="updateLimit"
-                @update:offset="updateOffset"
-                @update:q="updateQ"
-                @update:sort="updateSort"
-                @update:order="updateOrder"
-            />
+            <PaginationControls class="mt-3" :total="total" :limit="limit" :offset="offset" :q="q" :sort="sort"
+                :order="order" :sortOptions="sortOptions" @update:limit="updateLimit" @update:offset="updateOffset"
+                @update:q="updateQ" @update:sort="updateSort" @update:order="updateOrder" />
         </template>
     </div>
 </template>

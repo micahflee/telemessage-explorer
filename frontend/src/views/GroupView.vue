@@ -47,9 +47,6 @@ onMounted(async () => {
                     <li>
                         Network Type: <strong>{{ groupDetails.group.network_type }}</strong>
                     </li>
-                    <li>
-                        Notes: <strong>{{ groupDetails.group.notes }}</strong>
-                    </li>
                 </ul>
 
                 <h3>Users</h3>

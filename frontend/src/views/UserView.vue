@@ -50,9 +50,6 @@ onMounted(async () => {
                     <li>
                         Last Name: <strong>{{ userDetails.user.last_name }}</strong>
                     </li>
-                    <li>
-                        Notes: <strong>{{ userDetails.user.notes }}</strong>
-                    </li>
                 </ul>
 
                 <template v-if="userDetails.groups.length > 0">

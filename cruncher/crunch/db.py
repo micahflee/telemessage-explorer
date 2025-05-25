@@ -120,7 +120,6 @@ def create_tables(conn):
                     value TEXT,
                     first_name TEXT,
                     last_name TEXT,
-                    notes TEXT,
                     UNIQUE (type, value)
                 )
             """)
@@ -144,7 +143,6 @@ def create_tables(conn):
                     group_name TEXT,
                     source_type TEXT,
                     network_type TEXT,
-                    notes TEXT,
                     UNIQUE (group_name, source_type, network_type)
                 )
             """)

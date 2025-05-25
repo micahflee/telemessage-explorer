@@ -32,9 +32,6 @@ defineProps<{
                         <th class="text-nowrap">
                             Users
                         </th>
-                        <th class="text-nowrap">
-                            Notes
-                        </th>
                     </tr>
                 </thead>
                 <tbody class="list">
@@ -44,13 +41,12 @@ defineProps<{
                     <tr v-for="group in groups" :key="group.id">
                         <td class="id">
                             <router-link :to="`/groups/${group.id}`" class="btn btn-secondary btn-sm">{{ group.id
-                            }}</router-link>
+                                }}</router-link>
                         </td>
                         <td class="group_name">{{ group.group_name }}</td>
                         <td class="source_type">{{ group.source_type }}</td>
                         <td class="message_count">{{ group.message_count.toLocaleString() }}</td>
                         <td class="user_count">{{ group.user_count.toLocaleString() }}</td>
-                        <td class="notes">{{ group.notes }}</td>
                     </tr>
                 </tbody>
             </table>
