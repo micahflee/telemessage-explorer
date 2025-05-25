@@ -1327,6 +1327,16 @@ class TMObjects:
             )
             # Skip version/request-id objects
             or ("version" in obj and "request-id" in obj and len(obj) == 2)
+            # Skip msisdn/direction/groupMessage/subscriberId/messageContext/enterpriseSMSNumber
+            or (
+                "msisdn" in obj
+                and "direction" in obj
+                and "groupMessage" in obj
+                and "subscriberId" in obj
+                and "messageContext" in obj
+                and "enterpriseSMSNumber" in obj
+                and len(obj) == 6
+            )
         ):
             return
 
