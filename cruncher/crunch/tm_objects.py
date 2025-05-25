@@ -822,6 +822,8 @@ class TMObjects:
             or ("firstName" in obj and len(obj) == 1)
             # Skip last name objects
             or ("lastName" in obj and len(obj) == 1)
+            # Skip fullName/firstName objects
+            or ("fullName" in obj and "firstName" in obj and len(obj) == 2)
             # Skip {{headerName}} objects
             or ("{{headerName}}" in obj and len(obj) == 1)
             # Skip log messages
@@ -1082,6 +1084,14 @@ class TMObjects:
                 and "contentType" in obj
                 and len(obj) == 5
             )
+            # Skip name/value/attachSize/attachSizeEncrypted objects
+            or (
+                "name" in obj
+                and "value" in obj
+                and "attachSize" in obj
+                and "attachSizeEncrypted" in obj
+                and len(obj) == 4
+            )
             # Skip owner/sender/recipients/messageContent/callInfo fragments (even though these have have some message content)
             or (
                 "owner" in obj
@@ -1217,6 +1227,106 @@ class TMObjects:
                 and "attacheSizeEncrypted" in obj
                 and len(obj) == 4
             )
+            # Skip href/templated objects
+            or ("href" in obj and "templated" in obj and len(obj) == 2)
+            # Skip message/condition objects
+            or ("message" in obj and "condition" in obj and len(obj) == 2)
+            # Skip matched/notMatched objects
+            or ("matched" in obj and "notMatched" in obj and len(obj) == 2)
+            # Skip spring.application.pid objects
+            or ("spring.application.pid" in obj and len(obj) == 1)
+            # Skip property/activeProfiles/defaultProfiles/propertySources objects
+            or (
+                "property" in obj
+                and "activeProfiles" in obj
+                and "defaultProfiles" in obj
+                and "propertySources" in obj
+                and len(obj) == 4
+            )
+            # Skip enabled/disabled objects
+            or ("enabled" in obj and "disabled" in obj and len(obj) == 2)
+            # Skip name/class/descriptor objects
+            or (
+                "name" in obj
+                and "class" in obj
+                and "descriptor" in obj
+                and len(obj) == 3
+            )
+            # Skip params/headers/methods/consumes/patterns/produces objects
+            or (
+                "params" in obj
+                and "headers" in obj
+                and "methods" in obj
+                and "consumes" in obj
+                and "patterns" in obj
+                and "produces" in obj
+                and len(obj) == 6
+            )
+            # Skip enabled objects
+            or ("enabled" in obj and len(obj) == 1)
+            # Skip cacheManagers objects
+            or (
+                "cacheManagers" in obj
+                and len(obj) == 1
+                and "cacheManager" in obj["cacheManagers"]
+            )
+            # Skip ids objects
+            or ("ids" in obj and len(obj) == 1)
+            # Skip role/kubernetesPath/serviceAccountTokenFile objects
+            or (
+                "role" in obj
+                and "kubernetesPath" in obj
+                and "serviceAccountTokenFile" in obj
+                and len(obj) == 3
+            )
+            # Skip lifecycle objects
+            or ("lifecycle" in obj and len(obj) == 1)
+            # Skip role/gcpPath/projectId/credentials/jwtValidity/serviceAccountId objects
+            or (
+                "role" in obj
+                and "gcpPath" in obj
+                and "projectId" in obj
+                and "credentials" in obj
+                and "jwtValidity" in obj
+                and "serviceAccountId" in obj
+                and len(obj) == 6
+            )
+            # Skip certAuthPath/enabledProtocols/enabledCipherSuites objects
+            or (
+                "certAuthPath" in obj
+                and "enabledProtocols" in obj
+                and "enabledCipherSuites" in obj
+                and len(obj) == 3
+            )
+            # Skip AWS objects
+            or ("role" in obj and obj["role"] == "******")
+            # Skip enabled/serviceId objects
+            or ("enabled" in obj and "serviceId" in obj and len(obj) == 2)
+            # Skip userId/appIdPath objects
+            or ("userId" in obj and "appIdPath" in obj and len(obj) == 2)
+            # Skip name/value/attachSize objects
+            or (
+                "name" in obj
+                and "value" in obj
+                and "attachSize" in obj
+                and len(obj) == 3
+            )
+            # Skip inputs/prefix/properties objects
+            or (
+                "inputs" in obj
+                and "prefix" in obj
+                and "properties" in obj
+                and len(obj) == 3
+            )
+            # Skip name/content/fullName objects
+            or (
+                "name" in obj
+                and "content" in obj
+                and "fullName" in obj
+                and len(obj) == 3
+            )
+            # Skip version/request-id objects
+            or ("version" in obj and "request-id" in obj and len(obj) == 2)
         ):
             return
 
