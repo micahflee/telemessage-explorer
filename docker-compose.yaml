@@ -1,6 +1,6 @@
 services:
-  app:
-    build: app/.
+  backend:
+    build: ./backend
     environment:
       - DB_NAME=db
       - DB_USER=db
@@ -13,17 +13,20 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./app:/app
+      - ./backend:/app
     depends_on:
       - db
   
   # start the vue frontend in dev mode
   frontend:
-    build: ./app/frontend
+    build: ./frontend
     ports:
       - "5173:5173"
     volumes:
-      - ./app/frontend:/app
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
   
   db:
     image: postgres:17

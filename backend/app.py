@@ -4,7 +4,7 @@ import sys
 import psycopg2
 import psycopg2.extras
 
-from flask import Flask, jsonify, send_file, request
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 
 # Database connection
@@ -33,13 +33,6 @@ app = Flask(__name__, static_folder="frontend/dist/assets", static_url_path="/as
 # Enable CORS only in development mode
 if os.environ.get("FLASK_ENV") == "development":
     CORS(app)
-
-
-@app.route("/", defaults={"path": ""})
-@app.route("/<path:path>")
-def catch_all(path):
-    # Render the frontend
-    return send_file("frontend/dist/index.html")
 
 
 select_fields_messages = [
