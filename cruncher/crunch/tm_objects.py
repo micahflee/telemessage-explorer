@@ -806,11 +806,9 @@ class TMObjects:
 
     def skip_object(self, obj):
         """
-        Skip objects that are not relevant. Only display the unidentified ones.
+        Skip objects that are not relevant.
         """
-
         self.skipped_count += 1
-
         if (
             # Skip empty objects
             len(obj) == 0
