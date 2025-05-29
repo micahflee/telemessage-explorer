@@ -261,7 +261,7 @@ def get_users():
                     first_name ILIKE %s OR
                     last_name ILIKE %s
                 """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
+                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
             )
             total = cursor.fetchone()["count"]
 
@@ -284,7 +284,7 @@ def get_users():
                 ORDER BY {sort} {order}
                 LIMIT %s OFFSET %s
                 """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
+                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
             )
             users = cursor.fetchall()
 
@@ -415,7 +415,7 @@ def get_groups():
                     source_type ILIKE %s OR
                     network_type ILIKE %s
                 """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%"),
+                (f"%{q}%", f"%{q}%", f"%{q}%"),
             )
             total = cursor.fetchone()["count"]
 
@@ -437,7 +437,7 @@ def get_groups():
                 ORDER BY {sort} {order}
                 LIMIT %s OFFSET %s
                 """,
-                (f"%{q}%", f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
+                (f"%{q}%", f"%{q}%", f"%{q}%", limit, offset),
             )
             groups = cursor.fetchall()
 
