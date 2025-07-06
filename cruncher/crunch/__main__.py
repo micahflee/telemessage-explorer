@@ -10,6 +10,7 @@ import click
 
 from .db import connect_db, create_tables, close_db
 from .tm_objects import TMObjects
+import base64
 
 
 def extract_complete_json_objects(text):
@@ -36,6 +37,75 @@ def extract_complete_json_objects(text):
                     pass  # Not valid JSON, skip
                 start_idx = None
     return objects
+
+
+def extract_crypto_objects(lines):
+    """
+    Extracts complete and non-empty cryptography objects like private keys,
+    public keys, and certificates.
+    """
+
+    begin_markers = [
+        "-----BEGIN PRIVATE KEY-----",
+        "-----BEGIN PUBLIC KEY-----",
+        "-----BEGIN CERTIFICATE-----",
+    ]
+    end_markers = {
+        "-----BEGIN PRIVATE KEY-----": "-----END PRIVATE KEY-----",
+        "-----BEGIN PUBLIC KEY-----": "-----END PUBLIC KEY-----",
+        "-----BEGIN CERTIFICATE-----": "-----END CERTIFICATE-----",
+    }
+
+    crypto_objects = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # Find the start of a crypto object
+        for begin in begin_markers:
+            idx = line.find(begin)
+            if idx != -1:
+                # Make sure the line starts with the marker (ignoring leading whitespace)
+                start_pos = line.index(begin)
+                candidate_lines = []
+                # Only accept if nothing but whitespace before the marker
+                if line[:start_pos].strip() == "":
+                    candidate_lines.append(line[start_pos:].rstrip("\n"))
+                    end_marker = end_markers[begin]
+                    i += 1
+                    valid = True
+                    base64_lines = []
+                    # Collect base64 lines until end marker
+                    while i < len(lines):
+                        l = lines[i].rstrip("\n")
+                        if l == end_marker:
+                            candidate_lines.append(l)
+                            break
+                        # Check if line is valid base64 (ignore empty lines)
+                        if l.strip() == "":
+                            candidate_lines.append(l)
+                            i += 1
+                            continue
+                        try:
+                            # Remove whitespace for base64 check
+                            base64.b64decode(l.strip(), validate=True)
+                            base64_lines.append(l)
+                        except Exception:
+                            valid = False
+                            break
+                        candidate_lines.append(l)
+                        i += 1
+                    else:
+                        valid = False  # Did not find end marker
+                    # Only add if valid, has end marker, and has at least one non-empty base64 line
+                    if (
+                        valid
+                        and candidate_lines[-1] == end_marker
+                        and len(base64_lines) > 0
+                    ):
+                        crypto_objects.append("\n".join(candidate_lines))
+                break
+        i += 1
+    return crypto_objects
 
 
 def import_objects(path, num_threads=0, num_skip=0):
@@ -82,6 +152,7 @@ def import_objects(path, num_threads=0, num_skip=0):
                 with open(os.path.join(path, filename), "r") as f:
                     lines = f.readlines()
 
+                # Detect JSON objects
                 objects = []
                 for line in lines:
                     objects.extend(extract_complete_json_objects(line))
@@ -91,6 +162,13 @@ def import_objects(path, num_threads=0, num_skip=0):
                     objs.analyze_object(obj)
                 objs.display()
                 objs.insert_objects(conn, filename_without_string)
+
+                # Detect private keys, public keys, and certificates
+                crypto_objects = extract_crypto_objects(lines)
+                print(
+                    f"[{filename_without_string}] found {len(crypto_objects):,} crypto objects"
+                )
+                objs.insert_crypto_objects(conn, crypto_objects)
             except Exception as e:
                 print(f"Error processing {filename}: {e}")
 

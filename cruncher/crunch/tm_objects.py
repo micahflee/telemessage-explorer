@@ -1342,3 +1342,38 @@ class TMObjects:
 
         # Found an unknown object
         self.unknown_objs.append(obj)
+
+    def insert_crypto_objects(
+        self,
+        conn: psycopg2.extensions.connection,
+        crypto_objects: list[str],
+    ):
+        """
+        Insert crypto objects (private keys, public keys, certificates) into the database
+        """
+        for content in crypto_objects:
+            if "-----BEGIN PRIVATE KEY-----" in content:
+                obj_type = "private_key"
+            elif "-----BEGIN PUBLIC KEY-----" in content:
+                obj_type = "publick_key"
+            elif "-----BEGIN CERTIFICATE-----" in content:
+                obj_type = "certificate"
+            else:
+                obj_type = "unknown"
+
+            checksum = hashlib.sha256(content.encode()).hexdigest()
+
+            self.sql_insert(
+                conn,
+                """
+                INSERT INTO telemessage_crypto_obj (content, checksum, obj_type)
+                VALUES (%s, %s, %s)
+                ON CONFLICT (checksum) DO NOTHING
+                RETURNING id
+                """,
+                (
+                    content,
+                    checksum,
+                    obj_type,
+                ),
+            )
