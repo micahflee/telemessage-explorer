@@ -245,6 +245,16 @@ def create_tables(conn):
                 ON telemessage_validations (email);
             """)
 
+            # cryptography objects
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS telemessage_crypto_obj (
+                    id SERIAL PRIMARY KEY,
+                    content TEXT NOT NULL,
+                    checksum TEXT UNIQUE,
+                    obj_type TEXT NOT NULL
+                )
+            """)
+
             conn.commit()
             print("Tables created successfully")
     except Exception as e:
