@@ -32,10 +32,10 @@ cd path/to/extracted/dataset/
 mv heapdump heapdump.0
 ```
 
-Then run `strings` on each heap dump file (this takes a while) to extract the strings from them:
+To extract the JSON data from the heap dump files, use [json-carver](https://github.com/reportersunited/json-carver). To install it, first [install Rust](https://www.rust-lang.org/tools/install), and then run `cargo install json-carver`. Run `json-carver` on each heap dump file (this takes a while) like this:
 
 ```sh
-for F in $(ls); do echo $F; strings $F > ${F}.strings; done
+for F in $(ls); do echo $F; json-carver -i $F -o ${F}.strings; done
 ```
 
 When you're done, crunch the data like this:
@@ -44,6 +44,7 @@ When you're done, crunch the data like this:
 cd cruncher
 
 # Install dependencies
+# Note, if you're using macOS, you may need to `brew install postgresql` first
 poetry install
 
 # Set the database with environment variables (docker containers must be up)
